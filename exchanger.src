@@ -1,0 +1,22 @@
+        Ctl-Opt OPTION(*NODEBUGIO) DFTACTGRP(*NO) ACTGRP(*CALLER)
+                MAIN(MainLine) ;
+
+        dcl-proc Mainline;
+          dcl-pi *N;
+            base char(10);
+            currency char(10);
+            rate packed(15:5);
+          END-PI;
+          exec sql
+           MERGE INTO exchangep AS T
+                USING (VALUES(:base,:currency,:rate) )
+                 AS S(base, currency, rate)
+                 ON S.base = T.base and s.currency = t.currency
+                 WHEN MATCHED THEN UPDATE SET rate = S.rate
+                  WHEN NOT MATCHED
+                 THEN INSERT VALUES(s.base, s.currency, s.rate)  ;
+          return;
+
+        end-proc;
+
+                          
